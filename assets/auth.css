@@ -1,0 +1,50 @@
+/*
+  Supplemental styles for the new Login / Sign Up prototype screens.
+  Not part of the original pplx.app build — index-DQh77i9V.css is a purged
+  Tailwind bundle that only ships classes the shipped pages actually use, so
+  a handful of utilities these new screens need (stacking spacing, underline,
+  a couple of odd paddings) don't exist there. Defined here with the same
+  values Tailwind's default scale would use, and reusing the app's own CSS
+  variables so it stays visually identical to the rest of the product.
+*/
+
+.stack > * + * { margin-top: 1rem; }
+.stack-sm > * + * { margin-top: 0.75rem; }
+
+.pr-9 { padding-right: 2.25rem; }
+.py-20 { padding-top: 5rem; padding-bottom: 5rem; }
+
+.auth-link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: hsl(var(--gold) / 0.4);
+}
+.auth-link:hover {
+  text-decoration-color: hsl(var(--gold));
+}
+
+/* Keep browser autofill from stamping a white pill over the dark inputs */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: hsl(var(--foreground));
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
+  transition: background-color 999999s ease-in-out 0s;
+}
+
+input[type="checkbox"].gold-checkbox {
+  accent-color: hsl(var(--gold));
+}
+
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.auth-note {
+  border: 1px dashed hsl(var(--border));
+  background: hsl(var(--card) / 0.5);
+  color: hsl(var(--muted-foreground));
+}

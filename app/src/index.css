@@ -1,0 +1,129 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Design tokens copied from the original pplx.app build (index-DQh77i9V.css)
+  so this rebuilt codebase matches the brand exactly: dark, gold-accented,
+  Peaky Blinders-era palette, with a Playfair Display / DM Sans / JetBrains
+  Mono type system.
+*/
+:root {
+  --background: 30 10% 5%;
+  --foreground: 40 30% 92%;
+  --border: 36 14% 16%;
+  --card: 30 9% 8%;
+  --card-foreground: 40 30% 92%;
+  --card-border: 38 16% 15%;
+  --popover: 30 9% 9%;
+  --popover-foreground: 40 30% 92%;
+  --popover-border: 38 16% 16%;
+  --primary: 38 46% 57%;
+  --primary-foreground: 30 14% 6%;
+  --primary-border: 38 46% 62%;
+  --secondary: 34 10% 14%;
+  --secondary-foreground: 40 30% 92%;
+  --secondary-border: 34 10% 20%;
+  --muted: 34 8% 13%;
+  --muted-foreground: 40 12% 62%;
+  --accent: 36 14% 15%;
+  --accent-foreground: 40 30% 92%;
+  --destructive: 4 55% 44%;
+  --destructive-foreground: 40 30% 95%;
+  --destructive-border: 4 55% 52%;
+  --input: 36 14% 20%;
+  --ring: 38 46% 57%;
+  --gold: 38 46% 57%;
+  --gold-bright: 40 55% 66%;
+  --yes: 150 34% 42%;
+  --yes-fg: 150 40% 72%;
+  --no: 4 58% 47%;
+  --no-fg: 4 62% 68%;
+  --twitch: 264 61% 54%;
+  --button-outline: rgba(201, 161, 90, 0.18);
+  --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --radius: 0.5rem;
+}
+
+html {
+  font-family: var(--font-sans);
+}
+
+body {
+  min-height: 100vh;
+}
+
+@layer utilities {
+  .num {
+    font-family: var(--font-mono);
+    font-feature-settings: "tnum";
+    letter-spacing: -0.01em;
+  }
+
+  .rule-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.55), transparent);
+  }
+
+  .glow-gold {
+    box-shadow:
+      0 0 0 1px hsl(var(--gold) / 0.25),
+      0 8px 40px -12px hsl(var(--gold) / 0.35);
+  }
+
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .thin-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .thin-scroll::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 999px;
+  }
+
+  /* Subtle fixed film-grain texture over the whole app, matching the original. */
+  .grain::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Same "press" affordance the original design system uses on every button/nav item. */
+  .hover-elevate,
+  .active-elevate-2 {
+    position: relative;
+  }
+  .hover-elevate:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: hsl(0 0% 100% / 0.06);
+    pointer-events: none;
+  }
+  .active-elevate-2:active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: hsl(0 0% 0% / 0.1);
+    pointer-events: none;
+  }
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: hsl(var(--foreground));
+  -webkit-box-shadow: 0 0 0 1000px hsl(var(--background)) inset;
+  transition: background-color 999999s ease-in-out 0s;
+}
