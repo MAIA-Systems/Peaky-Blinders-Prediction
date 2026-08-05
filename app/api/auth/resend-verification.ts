@@ -1,7 +1,7 @@
-import { requireUser } from "../_lib/authz";
-import { assertKeyNotRateLimited, recordKeyEvent } from "../_lib/rateLimit";
-import { issueAndSendVerificationEmail } from "../_lib/verification";
-import { errorResponse, HttpError, json, withErrorHandling } from "../_lib/http";
+import { requireUser } from "../_lib/authz.js";
+import { assertKeyNotRateLimited, recordKeyEvent } from "../_lib/rateLimit.js";
+import { issueAndSendVerificationEmail } from "../_lib/verification.js";
+import { errorResponse, HttpError, json, withErrorHandling } from "../_lib/http.js";
 
 const MAX_PER_WINDOW = 3;
 const WINDOW_MS = 15 * 60 * 1000;

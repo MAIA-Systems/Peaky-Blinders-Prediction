@@ -1,10 +1,10 @@
 import { randomInt } from "node:crypto";
 import { eq } from "drizzle-orm";
-import { db } from "../../_db/client";
-import { users, wallets } from "../../_db/schema";
-import { exchangeCodeForTokens, fetchGoogleUserInfo, getGoogleConfig } from "../../_lib/google";
-import { createSession } from "../../_lib/session";
-import { getCookie } from "../../_lib/http";
+import { db } from "../../_db/client.js";
+import { users, wallets } from "../../_db/schema.js";
+import { exchangeCodeForTokens, fetchGoogleUserInfo, getGoogleConfig } from "../../_lib/google.js";
+import { createSession } from "../../_lib/session.js";
+import { getCookie } from "../../_lib/http.js";
 
 const STATE_COOKIE = "oauth_state";
 

@@ -1,11 +1,11 @@
-import { db } from "../_db/client";
-import { users, wallets } from "../_db/schema";
-import { hashPassword } from "../_lib/password";
-import { createSession } from "../_lib/session";
-import { signupSchema } from "../_lib/validation";
-import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http";
-import { isUniqueViolation, pgConstraintName } from "../_lib/dbErrors";
-import { issueAndSendVerificationEmail } from "../_lib/verification";
+import { db } from "../_db/client.js";
+import { users, wallets } from "../_db/schema.js";
+import { hashPassword } from "../_lib/password.js";
+import { createSession } from "../_lib/session.js";
+import { signupSchema } from "../_lib/validation.js";
+import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
+import { isUniqueViolation, pgConstraintName } from "../_lib/dbErrors.js";
+import { issueAndSendVerificationEmail } from "../_lib/verification.js";
 
 async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") return errorResponse(405, "Method not allowed");

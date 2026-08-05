@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
-import { db } from "../_db/client";
-import { users } from "../_db/schema";
-import { verifyPassword } from "../_lib/password";
-import { createSession } from "../_lib/session";
-import { loginSchema } from "../_lib/validation";
-import { assertNotRateLimited, recordLoginAttempt } from "../_lib/rateLimit";
-import { errorResponse, getClientIp, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http";
+import { db } from "../_db/client.js";
+import { users } from "../_db/schema.js";
+import { verifyPassword } from "../_lib/password.js";
+import { createSession } from "../_lib/session.js";
+import { loginSchema } from "../_lib/validation.js";
+import { assertNotRateLimited, recordLoginAttempt } from "../_lib/rateLimit.js";
+import { errorResponse, getClientIp, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
 async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") return errorResponse(405, "Method not allowed");

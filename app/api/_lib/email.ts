@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { HttpError } from "./http";
+import { HttpError } from "./http.js";
 
 let client: Resend | null = null;
 

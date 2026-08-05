@@ -1,8 +1,8 @@
 import { eq, sql } from "drizzle-orm";
-import { db } from "../_db/client";
-import { transactions, wallets } from "../_db/schema";
-import { getStripe, getWebhookSecret } from "../_lib/stripe";
-import { errorResponse, HttpError, json, withErrorHandling } from "../_lib/http";
+import { db } from "../_db/client.js";
+import { transactions, wallets } from "../_db/schema.js";
+import { getStripe, getWebhookSecret } from "../_lib/stripe.js";
+import { errorResponse, HttpError, json, withErrorHandling } from "../_lib/http.js";
 import type Stripe from "stripe";
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {

@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import bcrypt from "bcryptjs";
-import * as schema from "./schema";
+import * as schema from "./schema.js";
 
 const DEMO_USERS = [
   { name: "Ben H", username: "benh", email: "ben@example.com", password: "peakyblinders", role: "standard" as const },

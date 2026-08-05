@@ -1,5 +1,5 @@
-import { clearSessionCookie, destroySession } from "../_lib/session";
-import { errorResponse, json, withErrorHandling } from "../_lib/http";
+import { clearSessionCookie, destroySession } from "../_lib/session.js";
+import { errorResponse, json, withErrorHandling } from "../_lib/http.js";
 
 async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") return errorResponse(405, "Method not allowed");

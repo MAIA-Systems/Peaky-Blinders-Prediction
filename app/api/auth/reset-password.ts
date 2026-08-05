@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
-import { db } from "../_db/client";
-import { passwordResetTokens, sessions, users } from "../_db/schema";
-import { hashToken } from "../_lib/tokens";
-import { hashPassword } from "../_lib/password";
-import { createSession } from "../_lib/session";
-import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http";
+import { db } from "../_db/client.js";
+import { passwordResetTokens, sessions, users } from "../_db/schema.js";
+import { hashToken } from "../_lib/tokens.js";
+import { hashPassword } from "../_lib/password.js";
+import { createSession } from "../_lib/session.js";
+import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
 const bodySchema = z.object({ token: z.string().min(1), newPassword: z.string().min(8).max(200) });
 

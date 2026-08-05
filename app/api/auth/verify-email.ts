@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { and, eq, isNull } from "drizzle-orm";
-import { db } from "../_db/client";
-import { emailVerificationTokens, users } from "../_db/schema";
-import { hashToken } from "../_lib/tokens";
-import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http";
+import { db } from "../_db/client.js";
+import { emailVerificationTokens, users } from "../_db/schema.js";
+import { hashToken } from "../_lib/tokens.js";
+import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
 const bodySchema = z.object({ token: z.string().min(1) });
 

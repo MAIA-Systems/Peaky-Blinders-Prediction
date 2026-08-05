@@ -1,5 +1,5 @@
-import { getSessionUser, type SessionUser } from "./session";
-import { HttpError } from "./http";
+import { getSessionUser, type SessionUser } from "./session.js";
+import { HttpError } from "./http.js";
 
 /** Throws 401 if there's no valid session. */
 export async function requireUser(req: Request): Promise<SessionUser> {

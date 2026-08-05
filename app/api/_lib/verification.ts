@@ -1,7 +1,7 @@
-import { db } from "../_db/client";
-import { emailVerificationTokens } from "../_db/schema";
-import { generateToken } from "./tokens";
-import { sendVerificationEmail, isEmailConfigured } from "./email";
+import { db } from "../_db/client.js";
+import { emailVerificationTokens } from "../_db/schema.js";
+import { generateToken } from "./tokens.js";
+import { sendVerificationEmail, isEmailConfigured } from "./email.js";
 
 const TOKEN_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 

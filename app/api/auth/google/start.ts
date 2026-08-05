@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
-import { getGoogleConfig } from "../../_lib/google";
-import { buildCookie } from "../../_lib/http";
+import { getGoogleConfig } from "../../_lib/google.js";
+import { buildCookie } from "../../_lib/http.js";
 
 const STATE_COOKIE = "oauth_state";
 

@@ -1,8 +1,8 @@
 import { desc, eq } from "drizzle-orm";
-import { db } from "../_db/client";
-import { users, wallets } from "../_db/schema";
-import { requireAdmin } from "../_lib/authz";
-import { errorResponse, json, withErrorHandling } from "../_lib/http";
+import { db } from "../_db/client.js";
+import { users, wallets } from "../_db/schema.js";
+import { requireAdmin } from "../_lib/authz.js";
+import { errorResponse, json, withErrorHandling } from "../_lib/http.js";
 
 async function handler(req: Request): Promise<Response> {
   if (req.method !== "GET") return errorResponse(405, "Method not allowed");

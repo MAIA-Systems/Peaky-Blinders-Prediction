@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { HttpError } from "./http";
+import { HttpError } from "./http.js";
 
 let client: Stripe | null = null;
 

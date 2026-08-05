@@ -1,9 +1,9 @@
-import { db } from "../_db/client";
-import { transactions } from "../_db/schema";
-import { requireUser } from "../_lib/authz";
-import { getStripe } from "../_lib/stripe";
-import { createCheckoutSessionSchema } from "../_lib/validation";
-import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http";
+import { db } from "../_db/client.js";
+import { transactions } from "../_db/schema.js";
+import { requireUser } from "../_lib/authz.js";
+import { getStripe } from "../_lib/stripe.js";
+import { createCheckoutSessionSchema } from "../_lib/validation.js";
+import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
 async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") return errorResponse(405, "Method not allowed");

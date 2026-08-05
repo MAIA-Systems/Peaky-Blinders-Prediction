@@ -1,8 +1,8 @@
 import { randomBytes, createHash } from "node:crypto";
 import { and, eq, gt } from "drizzle-orm";
-import { db } from "../_db/client";
-import { sessions, users } from "../_db/schema";
-import { buildCookie, getClientIp, getCookie } from "./http";
+import { db } from "../_db/client.js";
+import { sessions, users } from "../_db/schema.js";
+import { buildCookie, getClientIp, getCookie } from "./http.js";
 
 const SESSION_COOKIE = "session";
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000; // 30 days

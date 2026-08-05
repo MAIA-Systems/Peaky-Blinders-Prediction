@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { eq } from "drizzle-orm";
-import { db } from "../_db/client";
-import { passwordResetTokens, users } from "../_db/schema";
-import { generateToken } from "../_lib/tokens";
-import { sendPasswordResetEmail, isEmailConfigured } from "../_lib/email";
-import { assertKeyNotRateLimited, recordKeyEvent } from "../_lib/rateLimit";
-import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http";
+import { db } from "../_db/client.js";
+import { passwordResetTokens, users } from "../_db/schema.js";
+import { generateToken } from "../_lib/tokens.js";
+import { sendPasswordResetEmail, isEmailConfigured } from "../_lib/email.js";
+import { assertKeyNotRateLimited, recordKeyEvent } from "../_lib/rateLimit.js";
+import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
 const bodySchema = z.object({ email: z.string().trim().toLowerCase().email() });
 const TOKEN_DURATION_MS = 60 * 60 * 1000; // 1 hour

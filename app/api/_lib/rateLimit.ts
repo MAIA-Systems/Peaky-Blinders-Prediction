@@ -1,7 +1,7 @@
 import { and, eq, gte, sql } from "drizzle-orm";
-import { db } from "../_db/client";
-import { loginAttempts, rateLimitEvents } from "../_db/schema";
-import { HttpError } from "./http";
+import { db } from "../_db/client.js";
+import { loginAttempts, rateLimitEvents } from "../_db/schema.js";
+import { HttpError } from "./http.js";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
