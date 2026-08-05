@@ -3,6 +3,7 @@ import { assertKeyNotRateLimited, recordKeyEvent } from "../_lib/rateLimit.js";
 import { issueAndSendVerificationEmail } from "../_lib/verification.js";
 import { errorResponse, HttpError, json, withErrorHandling } from "../_lib/http.js";
 
+import { toNodeHandler } from "../_lib/adapter.js";
 const MAX_PER_WINDOW = 3;
 const WINDOW_MS = 15 * 60 * 1000;
 
@@ -20,4 +21,7 @@ async function handler(req: Request): Promise<Response> {
   return json({ sent: true });
 }
 
-export default withErrorHandling(handler);
+// Named export: the raw Fetch-style handler, used directly by
+// scripts/test-backend.ts and scripts/dev-server.ts.
+export const fetchHandler = withErrorHandling(handler);
+export default toNodeHandler(fetchHandler);

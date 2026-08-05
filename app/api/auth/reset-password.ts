@@ -7,6 +7,7 @@ import { hashPassword } from "../_lib/password.js";
 import { createSession } from "../_lib/session.js";
 import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
+import { toNodeHandler } from "../_lib/adapter.js";
 const bodySchema = z.object({ token: z.string().min(1), newPassword: z.string().min(8).max(200) });
 
 async function handler(req: Request): Promise<Response> {
@@ -45,4 +46,7 @@ async function handler(req: Request): Promise<Response> {
   );
 }
 
-export default withErrorHandling(handler);
+// Named export: the raw Fetch-style handler, used directly by
+// scripts/test-backend.ts and scripts/dev-server.ts.
+export const fetchHandler = withErrorHandling(handler);
+export default toNodeHandler(fetchHandler);

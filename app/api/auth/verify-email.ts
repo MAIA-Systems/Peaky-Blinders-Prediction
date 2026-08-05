@@ -5,6 +5,7 @@ import { emailVerificationTokens, users } from "../_db/schema.js";
 import { hashToken } from "../_lib/tokens.js";
 import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
+import { toNodeHandler } from "../_lib/adapter.js";
 const bodySchema = z.object({ token: z.string().min(1) });
 
 async function handler(req: Request): Promise<Response> {
@@ -32,4 +33,7 @@ async function handler(req: Request): Promise<Response> {
   return json({ verified: true });
 }
 
-export default withErrorHandling(handler);
+// Named export: the raw Fetch-style handler, used directly by
+// scripts/test-backend.ts and scripts/dev-server.ts.
+export const fetchHandler = withErrorHandling(handler);
+export default toNodeHandler(fetchHandler);

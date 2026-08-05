@@ -5,6 +5,7 @@ import { getStripe, getWebhookSecret } from "../_lib/stripe.js";
 import { errorResponse, HttpError, json, withErrorHandling } from "../_lib/http.js";
 import type Stripe from "stripe";
 
+import { toNodeHandler } from "../_lib/adapter.js";
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const [transaction] = await db.select().from(transactions).where(eq(transactions.stripeCheckoutSessionId, session.id)).limit(1);
 
@@ -53,4 +54,7 @@ async function handler(req: Request): Promise<Response> {
   return json({ received: true });
 }
 
-export default withErrorHandling(handler);
+// Named export: the raw Fetch-style handler, used directly by
+// scripts/test-backend.ts and scripts/dev-server.ts.
+export const fetchHandler = withErrorHandling(handler);
+export default toNodeHandler(fetchHandler);

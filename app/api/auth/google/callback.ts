@@ -6,6 +6,7 @@ import { exchangeCodeForTokens, fetchGoogleUserInfo, getGoogleConfig } from "../
 import { createSession } from "../../_lib/session.js";
 import { getCookie } from "../../_lib/http.js";
 
+import { toNodeHandler } from "../../_lib/adapter.js";
 const STATE_COOKIE = "oauth_state";
 
 function redirectToLogin(origin: string, error: string): Response {
@@ -91,4 +92,7 @@ async function handler(req: Request): Promise<Response> {
   }
 }
 
-export default handler;
+// Named export: the raw Fetch-style handler, used directly by
+// scripts/test-backend.ts and scripts/dev-server.ts.
+export const fetchHandler = handler;
+export default toNodeHandler(fetchHandler);

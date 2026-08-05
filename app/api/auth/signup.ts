@@ -7,6 +7,7 @@ import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from 
 import { isUniqueViolation, pgConstraintName } from "../_lib/dbErrors.js";
 import { issueAndSendVerificationEmail } from "../_lib/verification.js";
 
+import { toNodeHandler } from "../_lib/adapter.js";
 async function handler(req: Request): Promise<Response> {
   if (req.method !== "POST") return errorResponse(405, "Method not allowed");
 
@@ -49,4 +50,7 @@ async function handler(req: Request): Promise<Response> {
   );
 }
 
-export default withErrorHandling(handler);
+// Named export: the raw Fetch-style handler, used directly by
+// scripts/test-backend.ts and scripts/dev-server.ts.
+export const fetchHandler = withErrorHandling(handler);
+export default toNodeHandler(fetchHandler);

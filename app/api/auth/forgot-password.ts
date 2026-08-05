@@ -7,6 +7,7 @@ import { sendPasswordResetEmail, isEmailConfigured } from "../_lib/email.js";
 import { assertKeyNotRateLimited, recordKeyEvent } from "../_lib/rateLimit.js";
 import { errorResponse, HttpError, json, readJsonBody, withErrorHandling } from "../_lib/http.js";
 
+import { toNodeHandler } from "../_lib/adapter.js";
 const bodySchema = z.object({ email: z.string().trim().toLowerCase().email() });
 const TOKEN_DURATION_MS = 60 * 60 * 1000; // 1 hour
 const MAX_PER_WINDOW = 3;
@@ -49,4 +50,7 @@ async function handler(req: Request): Promise<Response> {
   return json({ message: "If that email has an account, we've sent a reset link." });
 }
 
-export default withErrorHandling(handler);
+// Named export: the raw Fetch-style handler, used directly by
+// scripts/test-backend.ts and scripts/dev-server.ts.
+export const fetchHandler = withErrorHandling(handler);
+export default toNodeHandler(fetchHandler);

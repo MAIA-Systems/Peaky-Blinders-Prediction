@@ -2,9 +2,9 @@
  * Minimal local stand-in for `vercel dev` (which needs an interactive
  * `vercel login`/`vercel link` we can't do in this environment). Serves the
  * production build from dist/ and dispatches /api/* to the same handler
- * modules Vercel would call, using the same Fetch Request/Response shape —
- * so this is a faithful rehearsal of the real deployment, not a separate
- * mock path.
+ * modules Vercel would call — including api/_lib/adapter.ts, the exact
+ * Node (req,res) entry point Vercel's runtime actually invokes — so this
+ * rehearses the real deployment shape, not a separate mock path.
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
@@ -27,39 +27,7 @@ const CONTENT_TYPES: Record<string, string> = {
   ".ico": "image/x-icon",
 };
 
-async function nodeReqToFetchRequest(req: IncomingMessage, url: string): Promise<Request> {
-  const headers = new Headers();
-  for (const [key, value] of Object.entries(req.headers)) {
-    if (typeof value === "string") headers.set(key, value);
-    else if (Array.isArray(value)) headers.set(key, value.join(", "));
-  }
-
-  const hasBody = req.method !== "GET" && req.method !== "HEAD";
-  let body: Buffer | undefined;
-  if (hasBody) {
-    const chunks: Buffer[] = [];
-    for await (const chunk of req) chunks.push(chunk as Buffer);
-    body = Buffer.concat(chunks);
-  }
-
-  return new Request(url, { method: req.method, headers, body: body && body.length > 0 ? body : undefined });
-}
-
-function sendFetchResponse(res: ServerResponse, fetchRes: Response, body: string) {
-  res.statusCode = fetchRes.status;
-  for (const [key, value] of fetchRes.headers.entries()) {
-    // Headers can repeat (e.g. multiple Set-Cookie) — Fetch's Headers merges
-    // them with ", " which breaks Set-Cookie specifically, so special-case it
-    // via getSetCookie(), which keeps them as separate values.
-    if (key.toLowerCase() === "set-cookie") continue;
-    res.setHeader(key, value);
-  }
-  const setCookies = fetchRes.headers.getSetCookie();
-  if (setCookies.length > 0) res.setHeader("Set-Cookie", setCookies);
-  res.end(body);
-}
-
-async function handleApi(req: IncomingMessage, res: ServerResponse, fullUrl: string, pathname: string) {
+async function handleApi(req: IncomingMessage, res: ServerResponse, pathname: string) {
   const routePath = pathname.replace(/^\/api\//, "");
   // Vercel resolves both api/<route>.ts and api/<route>/index.ts to the same
   // path — this rehearsal server needs to try both, not just the first.
@@ -73,13 +41,10 @@ async function handleApi(req: IncomingMessage, res: ServerResponse, fullUrl: str
     return;
   }
 
-  const fetchReq = await nodeReqToFetchRequest(req, fullUrl);
   const moduleUrl = pathToFileURL(modulePath).href;
   const mod = await import(`${moduleUrl}?t=${Date.now()}`);
-  const handler = mod.default as (r: Request) => Promise<Response>;
-  const fetchRes = await handler(fetchReq);
-  const body = await fetchRes.text();
-  sendFetchResponse(res, fetchRes, body);
+  const handler = mod.default as (req: IncomingMessage, res: ServerResponse) => Promise<void>;
+  await handler(req, res);
 }
 
 async function handleStatic(req: IncomingMessage, res: ServerResponse, pathname: string) {
@@ -94,12 +59,9 @@ async function handleStatic(req: IncomingMessage, res: ServerResponse, pathname:
 
 const server = createServer(async (req, res) => {
   try {
-    // req.url already includes the query string (e.g. "/api/auth/google/callback?code=..&state=..") —
-    // routing only needs the pathname, but the handler needs the full thing.
     const { pathname } = new URL(req.url ?? "/", `http://localhost:${PORT}`);
-    const fullUrl = `http://localhost:${PORT}${req.url ?? "/"}`;
     if (pathname.startsWith("/api/")) {
-      await handleApi(req, res, fullUrl, pathname);
+      await handleApi(req, res, pathname);
     } else {
       await handleStatic(req, res, pathname);
     }

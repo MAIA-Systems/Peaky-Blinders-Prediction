@@ -1,20 +1,23 @@
 import { config } from "dotenv";
 config({ path: ".env.local" });
 
-import signupHandler from "../api/auth/signup";
-import loginHandler from "../api/auth/login";
-import logoutHandler from "../api/auth/logout";
-import meHandler from "../api/auth/me";
-import verifyEmailHandler from "../api/auth/verify-email";
-import resendVerificationHandler from "../api/auth/resend-verification";
-import forgotPasswordHandler from "../api/auth/forgot-password";
-import resetPasswordHandler from "../api/auth/reset-password";
-import googleStartHandler from "../api/auth/google/start";
-import googleCallbackHandler from "../api/auth/google/callback";
-import adminUsersHandler from "../api/admin/users";
-import walletHandler from "../api/wallet/index";
-import walletTransactionsHandler from "../api/wallet/transactions";
-import createCheckoutSessionHandler from "../api/payments/create-checkout-session";
+// Named `fetchHandler` imports — the raw Fetch-style handlers, before the
+// Node (req,res) adapter Vercel actually invokes in production gets
+// wrapped around them. See api/_lib/adapter.ts for why that wrapper exists.
+import { fetchHandler as signupHandler } from "../api/auth/signup";
+import { fetchHandler as loginHandler } from "../api/auth/login";
+import { fetchHandler as logoutHandler } from "../api/auth/logout";
+import { fetchHandler as meHandler } from "../api/auth/me";
+import { fetchHandler as verifyEmailHandler } from "../api/auth/verify-email";
+import { fetchHandler as resendVerificationHandler } from "../api/auth/resend-verification";
+import { fetchHandler as forgotPasswordHandler } from "../api/auth/forgot-password";
+import { fetchHandler as resetPasswordHandler } from "../api/auth/reset-password";
+import { fetchHandler as googleStartHandler } from "../api/auth/google/start";
+import { fetchHandler as googleCallbackHandler } from "../api/auth/google/callback";
+import { fetchHandler as adminUsersHandler } from "../api/admin/users";
+import { fetchHandler as walletHandler } from "../api/wallet/index";
+import { fetchHandler as walletTransactionsHandler } from "../api/wallet/transactions";
+import { fetchHandler as createCheckoutSessionHandler } from "../api/payments/create-checkout-session";
 import { db } from "../api/_db/client";
 import { users, wallets } from "../api/_db/schema";
 
