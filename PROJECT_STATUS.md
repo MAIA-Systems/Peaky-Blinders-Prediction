@@ -1,8 +1,9 @@
 # Real Project Status — Peaky Blinders Prediction Market
 
 **Date:** 5 August 2026
-**Overall status:** Auth and wallet are fully real and tested. Markets/trading are still a client-side simulation.
-**Git:** Nothing committed — everything is local, pending approval.
+**Overall status:** Auth and wallet are fully real, tested, and confirmed working in production. Markets/trading are still a client-side simulation.
+**Git:** Committed and pushed to `main`. Deployed on Vercel at `peak-blienders-prediction.vercel.app`.
+**Production check:** Verified live — signed in with a real Google account, real name/username/join date loaded, wallet showed the correct real balance (£0.00 for a brand-new account), Portfolio correctly showed the "Demo" data instead.
 
 ---
 
@@ -47,6 +48,14 @@ Real tables in production: `users`, `sessions`, `login_attempts`, `rate_limit_ev
 - Sessions actually die on logout
 - Stripe checkout fails gracefully without a configured key
 
+### 2.5 Production deployment
+Getting this onto Vercel surfaced two bugs that never showed up in local testing, because local testing (via `tsx`) doesn't exercise the exact same request path Vercel uses:
+
+1. **Module resolution crash (`ERR_MODULE_NOT_FOUND`)** — every `/api/*` route imports other files with a relative path (e.g. `../_lib/session`). `tsx` resolves that itself; Node's real ESM loader, which is what runs the compiled functions on Vercel, requires the explicit `.js` extension. Fixed by switching `tsconfig.api.json` to `moduleResolution: "NodeNext"` (which makes the compiler itself flag every offending import) and adding `.js` to all of them.
+2. **Handler signature mismatch (`req.headers.get is not a function`, `Invalid URL`)** — every route was written against the Fetch API (`Request` in, `Response` out). Vercel's Node.js runtime actually invokes functions with the classic `(req, res)` Node signature, not a Fetch-style one. Fixed by adding `api/_lib/adapter.ts`, a thin conversion layer — each route now exports a `fetchHandler` (the original logic, used directly by the test suite) and a `default` export (`fetchHandler` through the adapter, what Vercel actually calls).
+
+Both were root-caused from the Vercel Runtime Logs (not guessed), fixed, and re-verified against the real HTTP path locally before pushing again. The current deployment has signed in via Google, loaded `/api/auth/me` and `/api/wallet` with real `200`s, with no errors in the logs since.
+
 ---
 
 ## 3. What is still a DEMO (mock)
@@ -66,38 +75,39 @@ None of these screens are connected to the real balance or the logged-in user. M
 
 | Service | Status | Note |
 |---|---|---|
-| **Neon** (database) | ✅ Connected and migrated | — |
-| **Google OAuth** | ✅ Published to production | Tested end-to-end |
+| **Neon** (database) | ✅ Connected and migrated | Confirmed reachable from the live Vercel deployment |
+| **Google OAuth** | ✅ Published to production | Tested end-to-end, including on the live domain |
+| **Vercel environment variables** | ✅ Set | All 8 variables added in the dashboard and confirmed working in production |
 | **Resend** (email) | ⚠️ Configured, but... | `EMAIL_FROM` still uses the sandbox domain (`resend.dev`) — it only delivers to your own Resend account email until you verify a real domain |
-| **Stripe** | ⚠️ Test mode, works locally | Tested via the Stripe CLI (`stripe listen`) locally. **The production webhook hasn't been registered on Vercel yet** — you need to add the endpoint in the Stripe dashboard pointing at the deployed domain, and paste the new signing secret into Vercel's environment variables |
+| **Stripe** | ⚠️ Test mode, works locally only | Tested via the Stripe CLI (`stripe listen`) locally, including a real webhook-confirmed deposit. **The production webhook hasn't been registered on Vercel yet** — you need to add the endpoint in the Stripe dashboard pointing at the deployed domain, and paste that (different) signing secret into Vercel's environment variables |
 
 ---
 
-## 5. Required environment variables
+## 5. Environment variables
 
-Today these only exist in `app/.env.local` (never committed). **They need to be copied into Vercel's dashboard** (Project Settings → Environment Variables) before anything works in production:
+Live in both `app/.env.local` (local dev, never committed) and Vercel's dashboard (Project Settings → Environment Variables) for Production:
 
 ```
-DATABASE_URL
-SESSION_SECRET
-STRIPE_SECRET_KEY
-STRIPE_WEBHOOK_SECRET   ← will need a NEW value specific to production
-RESEND_API_KEY
-EMAIL_FROM
-GOOGLE_CLIENT_ID
-GOOGLE_CLIENT_SECRET
+DATABASE_URL            ✅
+SESSION_SECRET          ✅
+STRIPE_SECRET_KEY       ✅ (test mode)
+STRIPE_WEBHOOK_SECRET   ✅ but holds the local Stripe-CLI value — needs a
+                           production-specific one once the webhook below is registered
+RESEND_API_KEY          ✅
+EMAIL_FROM              ✅ (sandbox domain — see §4)
+GOOGLE_CLIENT_ID        ✅
+GOOGLE_CLIENT_SECRET    ✅
 ```
 
 ---
 
 ## 6. Recommended next steps, in order of impact
 
-1. **Register the Stripe webhook on Vercel** (Stripe dashboard → Developers → Webhooks → point at the deployed domain) — without this, production deposits never credit the balance
+1. **Register the Stripe webhook on Vercel** (Stripe dashboard → Developers → Webhooks → point at the deployed domain) — without this, production deposits never credit the balance. Replace `STRIPE_WEBHOOK_SECRET` in Vercel with the signing secret that registration gives you.
 2. **Verify a domain on Resend** — without this, verification/reset emails only ever reach you, not real users
-3. **Copy the environment variables to Vercel** — none of this works in production off `.env.local` alone
-4. **Decide if/when to migrate markets and trading to a real backend** — that's what it would take for Portfolio to stop being "Demo"
-5. **KYC/compliance**, if real (non-test-mode) money is ever involved
+3. **Decide if/when to migrate markets and trading to a real backend** — that's what it would take for Portfolio to stop being "Demo"
+4. **KYC/compliance**, if real (non-test-mode) money is ever involved
 
 ---
 
-*Compiled from the working session of 5 August 2026. Nothing in this project has been committed or pushed to the remote repository as of this point.*
+*Compiled from the working session of 5 August 2026, updated same day after confirming the production deployment on Vercel.*
