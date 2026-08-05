@@ -33,9 +33,11 @@ export function usePlaceTrade() {
     onSuccess: (market) => {
       queryClient.invalidateQueries({ queryKey: ["markets"] });
       queryClient.invalidateQueries({ queryKey: ["markets", "detail", market.id] });
-      queryClient.invalidateQueries({ queryKey: ["wallet"] });
-      queryClient.invalidateQueries({ queryKey: ["positions"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      // These are the demo wallet/positions (see api/demoTrading.ts) — a
+      // trade here never touches the real Stripe-funded balance.
+      queryClient.invalidateQueries({ queryKey: ["demoWallet"] });
+      queryClient.invalidateQueries({ queryKey: ["demoPositions"] });
+      queryClient.invalidateQueries({ queryKey: ["demoActivity"] });
     },
   });
 }

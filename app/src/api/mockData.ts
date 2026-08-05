@@ -1,5 +1,5 @@
 import { generatePriceHistory, seedFromString } from "@/lib/priceHistory";
-import type { Market, Position, Transaction, User } from "@/types";
+import type { Market, Position, Transaction } from "@/types";
 
 /**
  * In-memory mock backend. Every function in src/api/*.ts reads and writes
@@ -143,13 +143,3 @@ export const transactions: Transaction[] = [
   { id: "tx-7", type: "trade", detail: "NO · Will Tommy Shelby return in the Peaky Blinders film's final scene?", amount: -101, createdAt: daysAgo(4) },
   { id: "tx-8", type: "trade", detail: "NO · Will Tommy Shelby return in the Peaky Blinders film's final scene?", amount: -25.25, createdAt: daysAgo(14) },
 ];
-
-export const currentUser: User = {
-  id: "user-1",
-  name: "Ben H",
-  username: "benh",
-  email: "ben@example.com",
-  bio: "Trading culture since day one.",
-  joinedAt: "2025-10-01T00:00:00.000Z",
-  socials: { x: "benh", twitch: "benh" },
-};

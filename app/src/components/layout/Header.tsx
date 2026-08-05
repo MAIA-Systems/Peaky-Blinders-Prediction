@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { BarChart3, Briefcase, LogOut, Plus, Radio, User as UserIcon, Wallet as WalletIcon } from "lucide-react";
+import { BarChart3, Briefcase, LogOut, Plus, Radio, Shield, User as UserIcon, Wallet as WalletIcon } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
@@ -81,6 +81,16 @@ export function Header() {
                       >
                         <UserIcon className="h-4 w-4" /> Profile
                       </Link>
+                      {user.role === "admin" && (
+                        <Link
+                          to="/admin"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex items-center gap-2 rounded-md px-3 py-2 text-sm text-gold hover-elevate"
+                          data-testid="link-admin"
+                        >
+                          <Shield className="h-4 w-4" /> Admin
+                        </Link>
+                      )}
                       <button
                         onClick={handleLogout}
                         className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm text-muted-foreground hover-elevate"

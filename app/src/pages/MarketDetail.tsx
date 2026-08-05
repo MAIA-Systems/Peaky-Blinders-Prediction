@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sparkline } from "@/components/Sparkline";
 import { useMarket, usePlaceTrade } from "@/hooks/useMarkets";
 import { useAuth } from "@/hooks/useAuth";
-import { useWallet } from "@/hooks/useWallet";
+import { useDemoWallet } from "@/hooks/useDemoTrading";
 import { cn, formatCloseDate, formatCompact, formatGbp, formatPercent } from "@/lib/utils";
 import type { TradeSide } from "@/types";
 
@@ -18,7 +18,7 @@ export function MarketDetail() {
   const navigate = useNavigate();
   const { data: market, isLoading } = useMarket(id);
   const { isAuthenticated } = useAuth();
-  const { data: wallet } = useWallet();
+  const { data: wallet } = useDemoWallet();
   const placeTrade = usePlaceTrade();
 
   const [side, setSide] = useState<TradeSide>("YES");
@@ -162,7 +162,7 @@ export function MarketDetail() {
             </div>
             {wallet && (
               <div className="flex justify-between text-muted-foreground">
-                <span>Available balance</span>
+                <span>Demo balance</span>
                 <span className="num text-foreground">{formatGbp(wallet.balance)}</span>
               </div>
             )}

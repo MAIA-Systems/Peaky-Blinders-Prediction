@@ -1,6 +1,7 @@
 node_modules
 dist
 .tsbuild
+.tsbuild-api
 .env
 .env.local
 *.log

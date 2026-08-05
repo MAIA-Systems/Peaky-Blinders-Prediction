@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { CreditCard, Wallet as WalletIcon } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { PoweredByBadge } from "@/components/PoweredByBadge";
-import { useDeposit, useTransactions, useWallet } from "@/hooks/useWallet";
+import { useCreateDepositCheckout, useTransactions, useWallet } from "@/hooks/useWallet";
 import { cn, formatGbp, formatRelativeTime } from "@/lib/utils";
 
 const QUICK_AMOUNTS = [50, 100, 250, 500];
@@ -13,20 +15,22 @@ const QUICK_AMOUNTS = [50, 100, 250, 500];
 export function Wallet() {
   const { data: wallet } = useWallet();
   const { data: transactions } = useTransactions();
-  const deposit = useDeposit();
+  const createCheckout = useCreateDepositCheckout();
+  const [searchParams] = useSearchParams();
+  const depositStatus = searchParams.get("deposit"); // "success" | "cancelled", set by Stripe's redirect
 
   const [tab, setTab] = useState<"fiat" | "crypto">("fiat");
   const [amount, setAmount] = useState(100);
-  const [cardNumber, setCardNumber] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
-  async function depositWith(method: "card" | "apple_pay" | "google_pay") {
-    const detail =
-      method === "card"
-        ? `Card deposit •••• ${cardNumber.slice(-4) || "4242"}`
-        : method === "apple_pay"
-          ? "Apple Pay deposit"
-          : "Google Pay deposit";
-    await deposit.mutateAsync({ amountGbp: amount, method, detail });
+  async function handleDeposit() {
+    setError(null);
+    try {
+      const { checkoutUrl } = await createCheckout.mutateAsync(amount);
+      window.location.href = checkoutUrl; // full-page redirect — Stripe hosts the actual card form
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    }
   }
 
   return (
@@ -38,6 +42,15 @@ export function Wallet() {
         </div>
         <PoweredByBadge className="hidden sm:inline-flex" />
       </div>
+
+      {depositStatus === "success" && (
+        <p className="mt-4 rounded-md border border-yes/30 bg-yes/10 p-3 text-sm text-yes-fg" data-testid="text-deposit-success">
+          Payment received — your balance updates as soon as Stripe confirms it (usually a few seconds).
+        </p>
+      )}
+      {depositStatus === "cancelled" && (
+        <p className="mt-4 rounded-md border border-border bg-card/60 p-3 text-sm text-muted-foreground">Deposit cancelled — no charge was made.</p>
+      )}
 
       <Card className="mt-6 flex items-center gap-4 p-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-secondary">
@@ -101,56 +114,29 @@ export function Wallet() {
                 ))}
               </div>
 
-              <div className="mt-5">
-                <Label htmlFor="card-number">Card number</Label>
-                <Input
-                  id="card-number"
-                  value={cardNumber}
-                  onChange={(e) => setCardNumber(e.target.value)}
-                  placeholder="4242 4242 4242 4242"
-                  className="num"
-                  data-testid="input-card"
-                />
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <Input placeholder="MM / YY" className="num" data-testid="input-expiry" />
-                  <Input placeholder="CVC" className="num" data-testid="input-cvc" />
-                </div>
-              </div>
+              {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
 
-              <Button
-                className="mt-5 w-full glow-gold"
-                disabled={deposit.isPending || amount <= 0}
-                onClick={() => depositWith("card")}
-                data-testid="button-deposit-card"
-              >
-                {deposit.isPending ? "Processing…" : `Add ${formatGbp(amount)} with Card`}
+              <Button className="mt-5 w-full glow-gold" disabled={createCheckout.isPending || amount <= 0} onClick={handleDeposit} data-testid="button-deposit-card">
+                {createCheckout.isPending ? "Redirecting…" : `Continue to payment — ${formatGbp(amount)}`}
               </Button>
-
-              <div className="my-4 flex items-center gap-3">
-                <div className="h-px flex-1 bg-border" />
-                <span className="text-[10px] uppercase tracking-wider text-muted-foreground">or pay with</span>
-                <div className="h-px flex-1 bg-border" />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <Button variant="outline" disabled={deposit.isPending} onClick={() => depositWith("apple_pay")} data-testid="button-deposit-apple">
-                  Apple Pay
-                </Button>
-                <Button variant="outline" disabled={deposit.isPending} onClick={() => depositWith("google_pay")} data-testid="button-deposit-google">
-                  Google Pay
-                </Button>
-              </div>
+              <p className="mt-3 text-[11px] text-muted-foreground">
+                You'll finish this on Stripe's secure checkout page — card, Apple Pay or Google Pay, whatever your device offers. We
+                never see or store your card details.
+              </p>
             </Card>
           ) : (
             <Card className="mt-4 p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <Badge variant="outline">Demo</Badge>
+                <span className="text-xs text-muted-foreground">Not a real network — no funds move.</span>
+              </div>
               <Label>Network</Label>
               <div className="rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground">Ethereum (USDC)</div>
               <Label className="mt-4">Amount (USDC)</Label>
               <Input type="number" min={1} defaultValue={150} className="num" data-testid="input-usdc" />
-              <Button className="mt-5 w-full glow-gold" onClick={() => depositWith("card")} disabled={deposit.isPending}>
-                {deposit.isPending ? "Confirming…" : "Deposit USDC"}
+              <Button className="mt-5 w-full glow-gold" disabled data-testid="button-deposit-crypto">
+                Coming soon
               </Button>
-              <p className="mt-2 text-[11px] text-muted-foreground">Demo network — no real transaction is broadcast.</p>
             </Card>
           )}
         </div>
@@ -171,8 +157,7 @@ export function Wallet() {
                   <div className="min-w-0 flex-1">
                     <div className="truncate text-xs text-foreground">{tx.detail}</div>
                     <div className="text-[10px] capitalize text-muted-foreground">
-                      {tx.type}
-                      {tx.method ? ` · ${tx.method.replace("_", " ")}` : ""} · {formatRelativeTime(tx.createdAt)}
+                      {tx.type} · {formatRelativeTime(tx.createdAt)}
                     </div>
                   </div>
                   <span className={cn("num shrink-0 text-xs", tx.amount >= 0 ? "text-yes-fg" : "text-muted-foreground")}>

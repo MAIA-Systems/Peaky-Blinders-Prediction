@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/Logo";
+import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
 import { signupSchema } from "@/lib/validation";
 
@@ -59,6 +60,14 @@ export function Signup() {
       <p className="mt-2 text-center text-sm text-muted-foreground">From zero to your first trade in under 60 seconds.</p>
 
       <Card className="mt-8 w-full p-6">
+        <GoogleButton label="Sign up with Google" />
+
+        <div className="my-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
         <form onSubmit={handleSubmit} noValidate>
           <div>
             <Label htmlFor="name">Full name</Label>

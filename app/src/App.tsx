@@ -3,6 +3,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { AdminRoute } from "@/components/AdminRoute";
 import { Layout } from "@/components/layout/Layout";
 import { Home } from "@/pages/Home";
 import { MarketDetail } from "@/pages/MarketDetail";
@@ -13,6 +14,10 @@ import { Profile } from "@/pages/Profile";
 import { Stream } from "@/pages/Stream";
 import { Login } from "@/pages/Login";
 import { Signup } from "@/pages/Signup";
+import { ForgotPassword } from "@/pages/ForgotPassword";
+import { ResetPassword } from "@/pages/ResetPassword";
+import { VerifyEmail } from "@/pages/VerifyEmail";
+import { Admin } from "@/pages/Admin";
 import { NotFound } from "@/pages/NotFound";
 
 export function App() {
@@ -28,6 +33,9 @@ export function App() {
               <Route path="stream" element={<Stream />} />
               <Route path="login" element={<Login />} />
               <Route path="signup" element={<Signup />} />
+              <Route path="forgot-password" element={<ForgotPassword />} />
+              <Route path="reset-password" element={<ResetPassword />} />
+              <Route path="verify-email" element={<VerifyEmail />} />
               <Route
                 path="portfolio"
                 element={
@@ -50,6 +58,14 @@ export function App() {
                   <ProtectedRoute>
                     <Profile />
                   </ProtectedRoute>
+                }
+              />
+              <Route
+                path="admin"
+                element={
+                  <AdminRoute>
+                    <Admin />
+                  </AdminRoute>
                 }
               />
               <Route path="*" element={<NotFound />} />

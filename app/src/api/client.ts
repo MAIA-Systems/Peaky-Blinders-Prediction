@@ -20,7 +20,7 @@ export async function request<T>(path: string, init?: RequestInit): Promise<T> {
   });
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    throw new Error(body?.message ?? `Request failed: ${response.status}`);
+    throw new Error(body?.error ?? body?.message ?? `Request failed: ${response.status}`);
   }
   return response.json() as Promise<T>;
 }

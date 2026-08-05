@@ -1,20 +1,23 @@
 import { useState, type FormEvent } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Logo } from "@/components/Logo";
+import { GoogleButton } from "@/components/GoogleButton";
 import { useAuth } from "@/hooks/useAuth";
 import { loginSchema } from "@/lib/validation";
-import { DEMO_CREDENTIALS } from "@/api/auth";
+import { oauthErrorMessage } from "@/lib/oauthErrors";
 
 export function Login() {
   const { login, isLoginPending } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const from = (location.state as { from?: string } | null)?.from ?? "/";
+  const oauthError = oauthErrorMessage(searchParams.get("error"));
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +54,16 @@ export function Login() {
       <p className="mt-2 text-center text-sm text-muted-foreground">Sign in to trade the film, the characters, the business — live, in seconds.</p>
 
       <Card className="mt-8 w-full p-6">
+        {oauthError && <p className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">{oauthError}</p>}
+
+        <GoogleButton />
+
+        <div className="my-4 flex items-center gap-3">
+          <div className="h-px flex-1 bg-border" />
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">or</span>
+          <div className="h-px flex-1 bg-border" />
+        </div>
+
         <form onSubmit={handleSubmit} noValidate>
           <div>
             <Label htmlFor="email">Email</Label>
@@ -70,8 +83,15 @@ export function Login() {
           </div>
 
           <div className="mt-4">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="password" className="mb-0">
+                Password
+              </Label>
+              <Link to="/forgot-password" className="text-xs text-gold hover:text-gold-bright" data-testid="link-forgot-password">
+                Forgot password?
+              </Link>
+            </div>
+            <div className="relative mt-1.5">
               <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 id="password"
@@ -99,10 +119,6 @@ export function Login() {
           <Button type="submit" className="mt-6 w-full glow-gold" disabled={isLoginPending} data-testid="button-sign-in">
             {isLoginPending ? "Signing in…" : "Sign In"}
           </Button>
-
-          <p className="mt-4 rounded-md border border-dashed border-border bg-background/40 p-3 text-[11px] text-muted-foreground">
-            Demo account — <span className="num">{DEMO_CREDENTIALS.email}</span> / <span className="num">{DEMO_CREDENTIALS.password}</span>
-          </p>
         </form>
       </Card>
 

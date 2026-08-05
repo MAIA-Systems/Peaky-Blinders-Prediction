@@ -53,11 +53,15 @@ export interface Wallet {
   balance: number;
 }
 
+export type UserRole = "standard" | "admin";
+
 export interface User {
   id: string;
   name: string;
   username: string;
   email: string;
+  role: UserRole;
+  emailVerifiedAt: string | null;
   bio?: string;
   joinedAt: string;
   socials?: { x?: string; twitch?: string };

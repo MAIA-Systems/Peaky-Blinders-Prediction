@@ -1,47 +1,51 @@
-import { delay } from "./client";
-import { positions, transactions, wallet } from "./mockData";
-import type { DepositMethod, Position, Transaction, Wallet } from "@/types";
+import { request } from "./client";
+import type { Transaction, Wallet } from "@/types";
 
-export async function getWallet(): Promise<Wallet> {
-  return delay({ ...wallet });
+/**
+ * The real wallet — backed by Postgres (api/wallet/*.ts, api/payments/*.ts)
+ * and funded through actual Stripe Checkout. This is deliberately separate
+ * from api/demoTrading.ts, which is the simulated-trading side of the
+ * product and never touches this balance.
+ */
+
+interface ApiWallet {
+  balanceCents: number;
+  currency: string;
 }
 
-export async function getPositions(): Promise<Position[]> {
-  return delay([...positions]);
+interface ApiTransaction {
+  id: string;
+  type: Transaction["type"];
+  status: "pending" | "completed" | "failed";
+  amountCents: number;
+  currency: string;
+  detail: string;
+  createdAt: string;
+}
+
+export async function getWallet(): Promise<Wallet> {
+  const apiWallet = await request<ApiWallet>("/wallet");
+  return { balance: apiWallet.balanceCents / 100 };
 }
 
 export async function getTransactions(): Promise<Transaction[]> {
-  return delay([...transactions].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt)));
+  const { transactions } = await request<{ transactions: ApiTransaction[] }>("/wallet/transactions");
+  return transactions.map((tx) => ({
+    id: tx.id,
+    type: tx.type,
+    detail: tx.status === "pending" ? `${tx.detail} (pending)` : tx.detail,
+    amount: tx.amountCents / 100,
+    createdAt: tx.createdAt,
+  }));
 }
 
-export async function deposit(amountGbp: number, method: DepositMethod, detail: string): Promise<Wallet> {
-  wallet.balance = Number((wallet.balance + amountGbp).toFixed(2));
-  transactions.unshift({
-    id: `tx-${Date.now().toString(36)}`,
-    type: "deposit",
-    detail,
-    amount: amountGbp,
-    method,
-    createdAt: new Date().toISOString(),
+/** Kicks off a real Stripe Checkout session and returns the URL to redirect
+ * the browser to — deposits are never instant, so there's no "deposit()"
+ * that resolves with an updated balance the way the old mock had. The
+ * balance only actually changes once Stripe's webhook confirms payment. */
+export async function createDepositCheckout(amountGbp: number): Promise<{ checkoutUrl: string }> {
+  return request<{ checkoutUrl: string }>("/payments/create-checkout-session", {
+    method: "POST",
+    body: JSON.stringify({ amountGbp }),
   });
-  return delay({ ...wallet }, 700);
-}
-
-export async function cashout(positionId: string): Promise<Wallet> {
-  const index = positions.findIndex((p) => p.id === positionId);
-  if (index === -1) throw new Error("Position not found");
-  const position = positions[index];
-  const value = Number((position.shares * position.currentPrice).toFixed(2));
-
-  wallet.balance = Number((wallet.balance + value).toFixed(2));
-  positions.splice(index, 1);
-  transactions.unshift({
-    id: `tx-${Date.now().toString(36)}`,
-    type: "cashout",
-    detail: `Cash out · ${position.marketQuestion}`,
-    amount: value,
-    createdAt: new Date().toISOString(),
-  });
-
-  return delay({ ...wallet }, 500);
 }

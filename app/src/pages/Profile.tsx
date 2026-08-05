@@ -1,9 +1,10 @@
 import { Calendar, Pencil, Twitch } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Avatar } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
-import { usePositions, useTransactions } from "@/hooks/useWallet";
+import { useDemoPositions, useDemoActivity } from "@/hooks/useDemoTrading";
 import { cn, formatGbp, formatRelativeTime } from "@/lib/utils";
 
 function XIcon({ className }: { className?: string }) {
@@ -16,8 +17,8 @@ function XIcon({ className }: { className?: string }) {
 
 export function Profile() {
   const { user } = useAuth();
-  const { data: positions } = usePositions();
-  const { data: transactions } = useTransactions();
+  const { data: positions } = useDemoPositions();
+  const { data: transactions } = useDemoActivity();
 
   if (!user) return null;
 
@@ -56,7 +57,11 @@ export function Profile() {
         </div>
       </Card>
 
-      <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="mt-4 flex items-center gap-2">
+        <h2 className="text-xs uppercase tracking-wider text-muted-foreground">Trading stats</h2>
+        <Badge variant="outline">Demo</Badge>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Total Trades" value={String(trades.length)} />
         <Stat label="Open Positions" value={String(positions?.length ?? 0)} />
         <Stat label="Volume Traded" value={formatGbp(volumeTraded)} />

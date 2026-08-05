@@ -33,3 +33,17 @@ export const signupSchema = z
     message: "Passwords don't match",
     path: ["confirmPassword"],
   });
+
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Enter a valid email"),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, "Min. 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });

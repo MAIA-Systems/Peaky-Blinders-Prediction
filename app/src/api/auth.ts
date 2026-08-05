@@ -1,70 +1,87 @@
-import { delay } from "./client";
-import { currentUser } from "./mockData";
+import { request } from "./client";
 import type { AuthCredentials, SignupPayload, User } from "@/types";
 
 /**
- * Mock auth: a plaintext in-memory user store + a session id in
- * localStorage. Obviously not how you'd do this against a real backend
- * (cookies/JWTs, hashed passwords, server-side session) — this exists so
- * the Login/Signup pages and ProtectedRoute have something real to call
- * while the actual backend doesn't exist yet. Swap the bodies below for
- * `request()` calls (see client.ts) once it does.
+ * Talks to the real backend (api/auth/*.ts — Postgres via Drizzle, bcrypt
+ * password hashes, httpOnly session cookies). No client-side state here at
+ * all; the cookie the server sets is the only thing carrying the session.
  */
 
-interface StoredUser extends User {
-  password: string;
+interface ApiUser {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  role: "standard" | "admin";
+  createdAt: string;
+  emailVerifiedAt: string | null;
 }
 
-const SESSION_KEY = "pbpm_session_user_id";
-
-const users: StoredUser[] = [{ ...currentUser, password: "peakyblinders" }];
-
-function toPublicUser(user: StoredUser): User {
-  const { password: _password, ...publicUser } = user;
-  return publicUser;
-}
-
-export async function login({ email, password }: AuthCredentials): Promise<User> {
-  const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-  if (!user || user.password !== password) {
-    throw new Error("Invalid email or password");
-  }
-  localStorage.setItem(SESSION_KEY, user.id);
-  return delay(toPublicUser(user), 500);
-}
-
-export async function signup(payload: SignupPayload): Promise<User> {
-  if (users.some((u) => u.email.toLowerCase() === payload.email.toLowerCase())) {
-    throw new Error("An account with this email already exists");
-  }
-  if (users.some((u) => u.username.toLowerCase() === payload.username.toLowerCase())) {
-    throw new Error("That username is taken");
-  }
-
-  const user: StoredUser = {
-    id: `user-${Date.now().toString(36)}`,
-    name: payload.name,
-    username: payload.username,
-    email: payload.email,
-    password: payload.password,
-    joinedAt: new Date().toISOString(),
-    bio: "Trading culture since day one.",
+function toUser(apiUser: ApiUser): User {
+  return {
+    id: apiUser.id,
+    name: apiUser.name,
+    username: apiUser.username,
+    email: apiUser.email,
+    role: apiUser.role,
+    emailVerifiedAt: apiUser.emailVerifiedAt,
+    joinedAt: apiUser.createdAt,
   };
-  users.push(user);
-  localStorage.setItem(SESSION_KEY, user.id);
-  return delay(toPublicUser(user), 600);
+}
+
+export interface SignupResult extends ReturnType<typeof toUser> {
+  emailSent: boolean;
+}
+
+export async function login(credentials: AuthCredentials): Promise<User> {
+  const apiUser = await request<ApiUser>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  });
+  return toUser(apiUser);
+}
+
+export async function signup(payload: SignupPayload): Promise<SignupResult> {
+  const apiUser = await request<ApiUser & { emailSent: boolean }>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  return { ...toUser(apiUser), emailSent: apiUser.emailSent };
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  const id = localStorage.getItem(SESSION_KEY);
-  if (!id) return delay(null, 150);
-  const user = users.find((u) => u.id === id);
-  return delay(user ? toPublicUser(user) : null, 150);
+  const { user } = await request<{ user: ApiUser | null }>("/auth/me");
+  return user ? toUser(user) : null;
 }
 
 export async function logout(): Promise<void> {
-  localStorage.removeItem(SESSION_KEY);
-  return delay(undefined, 150);
+  await request<{ ok: true }>("/auth/logout", { method: "POST" });
 }
 
-export const DEMO_CREDENTIALS = { email: "ben@example.com", password: "peakyblinders" };
+export async function resendVerificationEmail(): Promise<void> {
+  await request<{ sent: true }>("/auth/resend-verification", { method: "POST" });
+}
+
+export async function verifyEmail(token: string): Promise<void> {
+  await request<{ verified: true }>("/auth/verify-email", {
+    method: "POST",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function forgotPassword(email: string): Promise<void> {
+  await request<{ message: string }>("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<User> {
+  const apiUser = await request<ApiUser>("/auth/reset-password", {
+    method: "POST",
+    body: JSON.stringify({ token, newPassword }),
+  });
+  return toUser(apiUser);
+}
+
+export const GOOGLE_SIGN_IN_URL = "/api/auth/google/start";

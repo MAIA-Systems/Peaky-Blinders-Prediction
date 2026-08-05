@@ -2,7 +2,8 @@
 
 A white-label prediction-market experience ("FanEngine", badged IPX) demoed under a
 Peaky Blinders skin. See [`ENGINEERING_REPORT.md`](./ENGINEERING_REPORT.md) for the
-full story of how this repo got here.
+full story of how this repo got here, and [`PROJECT_STATUS.md`](./PROJECT_STATUS.md)
+for what's actually real vs. still a demo right now.
 
 ## Layout
 
@@ -25,7 +26,8 @@ login.html, signup.html  /
 ```bash
 cd app
 npm install
-npm run dev        # http://localhost:5173
+npm run dev:full    # http://localhost:3000 — frontend + API together (needs app/.env.local)
 ```
 
-Demo account: `ben@example.com` / `peakyblinders`
+`npm run dev` alone only serves the frontend on :5173 — auth, wallet and every other
+`/api/*` route need `dev:full` (see `app/README.md` for what goes in `.env.local`).

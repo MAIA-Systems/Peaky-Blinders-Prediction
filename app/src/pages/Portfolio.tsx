@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { usePositions, useTransactions, useCashout } from "@/hooks/useWallet";
+import { useDemoPositions, useDemoActivity, useDemoCashout } from "@/hooks/useDemoTrading";
 import { formatGbp, formatPercent, formatRelativeTime } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 export function Portfolio() {
-  const { data: positions, isLoading } = usePositions();
-  const { data: transactions } = useTransactions();
-  const cashout = useCashout();
+  const { data: positions, isLoading } = useDemoPositions();
+  const { data: transactions } = useDemoActivity();
+  const cashout = useDemoCashout();
 
   const totalValue = (positions ?? []).reduce((sum, p) => sum + p.shares * p.currentPrice, 0);
   const totalCost = (positions ?? []).reduce((sum, p) => sum + p.shares * p.avgPrice, 0);
@@ -17,8 +17,13 @@ export function Portfolio() {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
-      <h1 className="font-display text-2xl font-semibold text-foreground md:text-3xl">Portfolio</h1>
-      <p className="mt-1 text-sm text-muted-foreground">Your open positions, live P/L, and history.</p>
+      <div className="flex items-center gap-2">
+        <h1 className="font-display text-2xl font-semibold text-foreground md:text-3xl">Portfolio</h1>
+        <Badge variant="outline">Demo</Badge>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        Simulated trading — separate from your real wallet balance. Every visitor sees the same demo positions.
+      </p>
 
       <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Open Positions" value={String(positions?.length ?? 0)} />
