@@ -13,12 +13,10 @@ app/                    The real thing — Vite + React + TypeScript source.
                          and for exactly how to wire up a real backend.
 
 index.html               \
-index-*.js / index-*.css  |  The original compiled build as delivered — kept
-assets/                   |  for reference. Static, no backend, demo data only.
-login.html, signup.html  /
+assets/                   |  The original compiled build as delivered — kept
+login.html, signup.html  /  for reference. Static, no backend, demo data only.
 
-*.jpg.jpeg               Original brand images (hero backdrop, stream demo,
-                         streamer avatar), also copied into app/public/images/.
+docs/images/             Architecture diagrams — see "Target architecture" below.
 ```
 
 ## Quick start
@@ -31,3 +29,26 @@ npm run dev:full    # http://localhost:3000 — frontend + API together (needs a
 
 `npm run dev` alone only serves the frontend on :5173 — auth, wallet and every other
 `/api/*` route need `dev:full` (see `app/README.md` for what goes in `.env.local`).
+
+## Target architecture (planned — not what's running today)
+
+The diagrams below describe where this is headed on AWS: API Gateway, Lambda
+services, an ECS Fargate matching engine, Aurora Postgres, ElastiCache Redis for
+live order-book pricing, and EventBridge/SQS wiring trades through to a WebSocket
+price feed.
+
+**What's actually deployed right now is simpler than this**: Vercel serverless
+functions (not Lambda behind API Gateway/CloudFront), Neon Postgres via Drizzle
+(not Aurora), no Redis, no matching engine, and no WebSocket price feed — see
+`PROJECT_STATUS.md` for the current state. Markets/trading are still mock,
+client-side data; only auth, sessions, and the Stripe wallet deposit flow are
+real today. Treat these diagrams as the system-design target for when trading
+moves off mock data, not as documentation of the live app.
+
+### System overview
+
+![Target system architecture](./docs/images/peaky_blinders_aws_architecture_overview.png)
+
+### Trade flow (place a position → price update)
+
+![Target trade flow](./docs/images/peaky_blinders_market_trade_flow.png)
