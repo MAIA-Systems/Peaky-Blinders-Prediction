@@ -30,20 +30,12 @@ npm run dev:full    # http://localhost:3000 — frontend + API together (needs a
 `npm run dev` alone only serves the frontend on :5173 — auth, wallet and every other
 `/api/*` route need `dev:full` (see `app/README.md` for what goes in `.env.local`).
 
-## Target architecture (planned — not what's running today)
+## Target architecture
 
 The diagrams below describe where this is headed on AWS: API Gateway, Lambda
 services, an ECS Fargate matching engine, Aurora Postgres, ElastiCache Redis for
 live order-book pricing, and EventBridge/SQS wiring trades through to a WebSocket
 price feed.
-
-**What's actually deployed right now is simpler than this**: Vercel serverless
-functions (not Lambda behind API Gateway/CloudFront), Neon Postgres via Drizzle
-(not Aurora), no Redis, no matching engine, and no WebSocket price feed — see
-`PROJECT_STATUS.md` for the current state. Markets/trading are still mock,
-client-side data; only auth, sessions, and the Stripe wallet deposit flow are
-real today. Treat these diagrams as the system-design target for when trading
-moves off mock data, not as documentation of the live app.
 
 ### System overview
 
