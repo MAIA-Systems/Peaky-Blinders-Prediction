@@ -4,60 +4,86 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { PoweredByBadge } from "@/components/PoweredByBadge";
+import { TwitchChat, TwitchPlayer, TWITCH_CHANNEL } from "@/components/TwitchEmbed";
 import { useMarket } from "@/hooks/useMarkets";
+import { useTrendingStream } from "@/hooks/useTrendingTwitch";
 import { formatPercent } from "@/lib/utils";
 
 export function Stream() {
   const { data: market } = useMarket("tommygungaming-ranked");
+  const { data: trending, isLoading: isTrendingLoading, isError: isTrendingError } = useTrendingStream();
+
+  // Falls back to the static placeholder channel if Twitch isn't configured
+  // yet, or the category genuinely has nothing live and embeddable right now.
+  const channel = trending?.channel ?? TWITCH_CHANNEL;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8 md:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-8 md:px-6">
       <div className="flex items-center gap-3">
         <span className="rule-gold w-10" />
         <span className="text-[11px] uppercase tracking-[0.28em] text-gold">FanEngine Embedded Widget</span>
       </div>
       <h1 className="font-display mt-2 text-2xl font-semibold text-foreground md:text-3xl">Live inside any Twitch stream</h1>
       <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-        Same wallet. Same markets. Zero user acquisition. This is a demo of the FanEngine widget embedded directly into a creator's
-        stream — viewers trade without ever leaving Twitch.
+        A real, live Twitch stream and chat, embedded with Twitch's own player — proving the integration works with any channel.
+        The betting overlay below it is a separate, fictional example (not tied to this streamer), showing what FanEngine would
+        add once a creator actually opts in.
       </p>
 
-      <div className="mt-6 overflow-hidden rounded-lg border border-card-border bg-card">
-        <div className="relative aspect-video w-full bg-black">
-          <img src="/images/game-feed.jpg" alt="Live stream feed" className="h-full w-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
-
-          <div className="absolute left-3 top-3 flex items-center gap-1.5 rounded bg-destructive px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
-            <Radio className="h-3 w-3 animate-pulse" /> Live
-          </div>
-
-          <div className="absolute bottom-3 left-3 flex items-center gap-2">
-            <img src="/images/streamer-avatar.jpg" alt="TommyGunGaming" className="h-9 w-9 rounded-full border-2 border-white/80 object-cover" />
-            <div>
-              <p className="rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-medium text-white">TommyGunGaming</p>
-              <p className="text-xs text-twitch">Ranked Grind — can we hit Diamond tonight?</p>
-            </div>
-          </div>
-
-          {market && (
-            <div className="absolute bottom-3 right-3 w-[min(280px,calc(100%-1.5rem))] rounded-md border border-gold/30 bg-background/90 p-3 backdrop-blur">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline">{market.category}</Badge>
-                <span className="num text-xs text-gold-bright">{formatPercent(market.yesProbability)} YES</span>
-              </div>
-              <p className="mt-2 text-xs font-medium leading-snug text-foreground">{market.question}</p>
-              <p className="mt-1 text-[10px] text-muted-foreground">
-                Trade the outcome above — settled instantly against your Peaky Blinders wallet.
-              </p>
-              <Link to={`/market/${market.id}`}>
-                <Button size="sm" className="mt-2 w-full glow-gold">
-                  Trade now
-                </Button>
-              </Link>
-            </div>
-          )}
+      <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
+        <div className="overflow-hidden rounded-lg border border-card-border bg-black">
+          <TwitchPlayer key={channel} channel={channel} className="aspect-video w-full" />
+        </div>
+        <div className="overflow-hidden rounded-lg border border-card-border">
+          <TwitchChat key={channel} channel={channel} className="h-full min-h-[360px] w-full lg:min-h-0" />
         </div>
       </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+        {isTrendingLoading && <span>Finding the most-watched VALORANT stream right now…</span>}
+        {!isTrendingLoading && trending && (
+          <>
+            <span className="inline-flex items-center gap-1 text-gold">
+              <Radio className="h-3 w-3" /> Trending #1 in VALORANT
+            </span>
+            <span>
+              — <span className="text-foreground">{trending.displayName}</span> ·{" "}
+              <span className="num">{trending.viewers.toLocaleString("en-GB")}</span> viewers · refreshes every 60s
+            </span>
+          </>
+        )}
+        {!isTrendingLoading && !trending && (
+          <span>
+            {isTrendingError
+              ? "Live trending lookup isn't configured yet — showing a placeholder channel instead."
+              : "No embeddable VALORANT stream is live right now — showing a placeholder channel instead."}{" "}
+            (<span className="num text-foreground">{channel}</span>)
+          </span>
+        )}
+      </div>
+
+      <Card className="mt-8 p-5">
+        <div className="mb-3 flex items-center gap-2">
+          <Badge variant="outline">Concept mockup</Badge>
+          <span className="text-xs text-muted-foreground">Fictional market — not connected to the stream above</span>
+        </div>
+        <h2 className="font-display text-lg font-semibold text-foreground">What FanEngine adds, once a creator opts in</h2>
+        {market && (
+          <div className="mt-4 max-w-sm rounded-md border border-gold/30 bg-background/60 p-3">
+            <div className="flex items-center justify-between">
+              <Badge variant="outline">{market.category}</Badge>
+              <span className="num text-xs text-gold-bright">{formatPercent(market.yesProbability)} YES</span>
+            </div>
+            <p className="mt-2 text-xs font-medium leading-snug text-foreground">{market.question}</p>
+            <p className="mt-1 text-[10px] text-muted-foreground">Trade the outcome above — settled instantly against your Peaky Blinders wallet.</p>
+            <Link to={`/market/${market.id}`}>
+              <Button size="sm" className="mt-2 w-full glow-gold">
+                Trade now
+              </Button>
+            </Link>
+          </div>
+        )}
+      </Card>
 
       <Card className="mt-6 p-5">
         <h2 className="font-display text-lg font-semibold text-foreground">How it works</h2>
