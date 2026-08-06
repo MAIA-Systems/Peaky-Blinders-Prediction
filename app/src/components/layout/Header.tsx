@@ -46,7 +46,7 @@ export function Header() {
                 )
               }
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-8 w-8" />
               {item.label}
             </NavLink>
           ))}
